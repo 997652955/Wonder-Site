@@ -1,0 +1,63 @@
+<template>
+  <div class="container">
+    <header>
+      <h1>网站导航</h1>
+      <div class="search-box">
+        <input v-model="searchQuery" placeholder="搜索网站..." />
+      </div>
+    </header>
+
+    <div class="category" v-for="category in filteredCategories" :key="category.name">
+      <h2>{{ category.name }}</h2>
+      <div class="link-grid">
+        <a 
+          v-for="link in category.links" 
+          :key="link.url"
+          :href="link.url"
+          target="_blank"
+          class="link-card"
+        >
+          <div class="link-content">
+            <img v-if="link.icon" :src="link.icon" class="link-icon" />
+            <h3>{{ link.title }}</h3>
+            <p>{{ link.desc }}</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      categories: [],
+      searchQuery: ''
+    }
+  },
+  computed: {
+    filteredCategories() {
+      return this.categories.map(category => ({
+        ...category,
+        links: category.links.filter(link =>
+          link.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          link.desc.toLowerCase().includes(this.searchQuery.toLowerCase())
+        )
+      })).filter(category => category.links.length > 0)
+    }
+  },
+  async mounted() {
+    try {
+      const response = await this.$http.get('/nav-links')
+      this.categories = response.data
+    } catch (error) {
+      console.error('Error fetching navigation data:', error)
+    }
+  }
+}
+</script>
+
+<style>
+/* 样式部分 */
+</style> 
